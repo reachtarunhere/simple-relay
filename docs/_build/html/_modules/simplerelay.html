@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>simplerelay &mdash; Simple Relay 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Simple Relay 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Simple Relay 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for simplerelay</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Task (GSoC 2015)</span>
+<span class="sd">A simple script that: reads arbitrary</span>
+<span class="sd">input from one socket and writes it to</span>
+<span class="sd">another socket.</span>
+
+<span class="sd">Allows two clients to connect.</span>
+<span class="sd">Runs on port 9999.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">select</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">SERVER_HOST</span> <span class="o">=</span> <span class="s">&#39;127.0.0.1&#39;</span>
+<span class="n">PORT</span> <span class="o">=</span> <span class="mi">9999</span>
+
+<div class="viewcode-block" id="Connection"><a class="viewcode-back" href="../code.html#simplerelay.Connection">[docs]</a><span class="k">class</span> <span class="nc">Connection</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Connection handeler for each connected client. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_socket</span><span class="p">,</span> <span class="n">client_adress</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Instantiates a Connection class object, which</span>
+<span class="sd">            is used to read and write to connections.</span>
+<span class="sd">            write to them.</span>
+
+<span class="sd">            :param client_socket: A socket object.</span>
+<span class="sd">            :param client_adress: Adress of client connection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="n">client_socket</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addrs</span> <span class="o">=</span> <span class="n">client_adress</span>
+
+
+<div class="viewcode-block" id="Connection.recieve_data"><a class="viewcode-back" href="../code.html#simplerelay.Connection.recieve_data">[docs]</a>    <span class="k">def</span> <span class="nf">recieve_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reads data from socket &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+</div>
+<div class="viewcode-block" id="Connection.send_data"><a class="viewcode-back" href="../code.html#simplerelay.Connection.send_data">[docs]</a>    <span class="k">def</span> <span class="nf">send_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sends data over the socket object.</span>
+
+<span class="sd">            :param data: The string to be sent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Server"><a class="viewcode-back" href="../code.html#simplerelay.Server">[docs]</a><span class="k">class</span> <span class="nc">Server</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Server to read from one socket and write to other. &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Instantiates a Server class object, which</span>
+<span class="sd">            is used to accept client connections and</span>
+<span class="sd">            relay data between them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sock_map</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># between socket and Connection object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+        <span class="c"># Enable re-use of socket address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="mi">9999</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Unable to bind, server will now quit.&#39;</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&#39;Server listening to port: </span><span class="si">%s</span><span class="s"> ...&#39;</span> <span class="o">%</span> <span class="n">PORT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">accept_connections</span><span class="p">()</span> <span class="c"># connecting both clients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> <span class="c"># transfering data between clients</span>
+
+
+<div class="viewcode-block" id="Server.accept_connections"><a class="viewcode-back" href="../code.html#simplerelay.Server.accept_connections">[docs]</a>    <span class="k">def</span> <span class="nf">accept_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Accepts connections for 2 clients</span>
+<span class="sd">            and instantiates corresponding</span>
+<span class="sd">            Connection objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sock_one</span><span class="p">,</span> <span class="n">address_one</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">&#39;Connected to first client: &#39;</span><span class="p">,</span> <span class="n">address_one</span>
+            <span class="n">sock_two</span><span class="p">,</span> <span class="n">address_two</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">&#39;Connected to second client: &#39;</span><span class="p">,</span> <span class="n">address_two</span>
+            <span class="n">first_connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">sock_one</span><span class="p">,</span> <span class="n">address_one</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock_map</span><span class="p">[</span><span class="n">sock_one</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_connection</span>
+            <span class="n">second_connection</span> <span class="o">=</span> <span class="n">Connection</span><span class="p">(</span><span class="n">sock_two</span><span class="p">,</span> <span class="n">address_two</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock_map</span><span class="p">[</span><span class="n">sock_two</span><span class="p">]</span> <span class="o">=</span> <span class="n">second_connection</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&#39;Server has been stopped.&#39;</span>
+
+</div>
+<div class="viewcode-block" id="Server.run"><a class="viewcode-back" href="../code.html#simplerelay.Server.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Main function that will relay connections.</span>
+
+<span class="sd">            Checks which socket is readable among</span>
+<span class="sd">            connected clients. Then reads data from</span>
+<span class="sd">            one socket and writes to another.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_client_socks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock_map</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">readable_sockets</span><span class="p">,</span> <span class="n">writeable_sockets</span><span class="p">,</span> <span class="n">error_sockets</span> <span class="o">=</span> \
+            <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">all_client_socks</span><span class="p">,</span> <span class="n">all_client_socks</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">for</span> <span class="n">r_socket</span> <span class="ow">in</span> <span class="n">readable_sockets</span><span class="p">:</span>
+                <span class="n">sender</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock_map</span><span class="p">[</span><span class="n">r_socket</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">all_client_socks</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="n">r_socket</span><span class="p">:</span> <span class="c"># s will be socket other than sender</span>
+                        <span class="n">reciever</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock_map</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">sender</span><span class="o">.</span><span class="n">recieve_data</span><span class="p">()</span>
+                <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">print</span> <span class="s">&quot;Error receiving data: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="c"># The connection on sender end is dead / socket has closed</span>
+                    <span class="n">writeable_sockets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c">#closing reciever socket</span>
+                    <span class="k">print</span> <span class="s">&quot;Lost connection, server will exit&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">reciever</span><span class="o">.</span><span class="n">send_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="c"># The connection on reciever end is dead / socket has closed</span>
+                    <span class="n">readable_sockets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> <span class="c">#closing sender socket</span>
+                    <span class="k">print</span> <span class="s">&quot;Unable to send data </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span>
+                    <span class="k">print</span> <span class="s">&quot;Server will exit&quot;</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">()</span>
+
+ 
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Simple Relay 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Tarun Kumar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

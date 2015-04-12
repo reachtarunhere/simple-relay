@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Code Documentation (Auto Generated) &mdash; Simple Relay 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Simple Relay 1.0 documentation" href="index.html" />
+    <link rel="prev" title="Writing Clients" href="client.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="client.html" title="Writing Clients"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Simple Relay 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-simplerelay">
+<span id="code-documentation-auto-generated"></span><h1>Code Documentation (Auto Generated)<a class="headerlink" href="#module-simplerelay" title="Permalink to this headline">¶</a></h1>
+<p>Task (GSoC 2015)
+A simple script that: reads arbitrary
+input from one socket and writes it to
+another socket.</p>
+<p>Allows two clients to connect.
+Runs on port 9999.</p>
+<dl class="class">
+<dt id="simplerelay.Connection">
+<em class="property">class </em><tt class="descclassname">simplerelay.</tt><tt class="descname">Connection</tt><big>(</big><em>client_socket</em>, <em>client_adress</em><big>)</big><a class="reference internal" href="_modules/simplerelay.html#Connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simplerelay.Connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connection handeler for each connected client.</p>
+<dl class="method">
+<dt id="simplerelay.Connection.recieve_data">
+<tt class="descname">recieve_data</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simplerelay.html#Connection.recieve_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simplerelay.Connection.recieve_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data from socket</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simplerelay.Connection.send_data">
+<tt class="descname">send_data</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/simplerelay.html#Connection.send_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simplerelay.Connection.send_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends data over the socket object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; The string to be sent.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="simplerelay.Server">
+<em class="property">class </em><tt class="descclassname">simplerelay.</tt><tt class="descname">Server</tt><a class="reference internal" href="_modules/simplerelay.html#Server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simplerelay.Server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Server to read from one socket and write to other.</p>
+<dl class="method">
+<dt id="simplerelay.Server.accept_connections">
+<tt class="descname">accept_connections</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simplerelay.html#Server.accept_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simplerelay.Server.accept_connections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts connections for 2 clients
+and instantiates corresponding
+Connection objects.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simplerelay.Server.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/simplerelay.html#Server.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#simplerelay.Server.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function that will relay connections.</p>
+<p>Checks which socket is readable among
+connected clients. Then reads data from
+one socket and writes to another.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="client.html"
+                        title="previous chapter">Writing Clients</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/code.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="client.html" title="Writing Clients"
+             >previous</a> |</li>
+        <li><a href="index.html">Simple Relay 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Tarun Kumar.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
